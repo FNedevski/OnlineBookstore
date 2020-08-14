@@ -1,0 +1,198 @@
+﻿@model IEnumerable<OnlineBookstore.Data.Entities.Book>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1 class="bg-dark text-white text-center p-3">Bookstore List</h1>
+<div class="container-fluid">
+    @if (ViewContext.HttpContext.User.IsInRole("admin"))
+    {
+        <div class="row">
+            <div class="col-12 col-md-12">
+                <a asp-action="Create" class="btn btn-success m-3" style="float:right"> <i class="fas fa-plus"></i> Create</a>
+            </div>
+        </div>
+    }
+    </div>
+
+<div class="custom-container">
+    <table id="booksDataTable" class="table table-striped row-border" style="width:100%">
+        <thead class="thead-dark">
+            <tr>
+                <th> Book Cover </th>
+                <th> Title </th>
+                <th> Author </th>
+                <th> Year Of Issue </th>
+                <th> Pages </th>
+                <th> Genre </th>
+                <th> Category</th>
+                <th> Price </th>
+                <th> Book Type </th>
+                <th> Actions </th>
+            </tr>
+        </thead>
+    </table>
+
+    <!-- Details Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" id="modalDialogStyle" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"> <span id="detailsTitle"></span> Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="detailsTable table table-striped table-bordered">
+                        <tr>
+                            <td> Title: </td>
+                            <td><span id="detailsTitle2"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Author: </td>
+                            <td><span id="detailsAuthor"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Year Of Issue: </td>
+                            <td><span id="detailsYearOfIssue"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Pages: </td>
+                            <td><span id="detailsPages"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Publisher: </td>
+                            <td><span id="detailsPublisher"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Genre: </td>
+                            <td><span id="detailsGenre"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Category: </td>
+                            <td><span id="detailsCategory"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Price: </td>
+                            <td><span id="detailsPrice"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Book Type: </td>
+                            <td><span id="detailsBookType"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Country: </td>
+                            <td><span id="detailsCountry"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Edition: </td>
+                            <td><span id="detailsEdition"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Language: </td>
+                            <td><span id="detailsLanguage"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Dimensions: </td>
+                            <td><span id="detailsDimensions"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Weight: </td>
+                            <td><span id="detailsWeight"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Copies: </td>
+                            <td><span id="detailsCopies"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Shipping: </td>
+                            <td><span id="detailsShipping"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Sold Items: </td>
+                            <td><span id="detailsSoldItems"></span></td>
+                        </tr>
+                        <tr>
+                            <td> Description: </td>
+                            <td><span id="detailsDescription"></span></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts{
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            var table = $("#booksDataTable").DataTable({
+                ajax: {
+                    url: "/Book/FillBooksDataTable",
+                    type: "GET",
+                    datatype: "json",
+                    //success: function (data) {
+                    //    console.log(data);
+                    //},
+                    //error: function () {
+                    //    alert("error");
+                    //}
+                },
+                columns: [
+                    {
+                        "data": "photoURL",
+                        "render": function (data) {
+                            return '<img src="images/' + data + '" width="100" />';
+                        }
+                    },
+
+                    { "data": "title", "autoWidth": true },
+                    { "data": "authorName", "autoWidth": true },
+                    {
+                        data: "yearOfIssue",
+                        render: function (data, type) {
+                             if(type === "sort" || type === "type"){
+                                return data;
+                            }
+                            return moment(data).format("DD/MM/YYYY");
+                        }
+                    },
+                    { "data": "numberOfPages", "autoWidth": true },
+                    { "data": "genre", "autoWidth": true },
+                    { "data": "categoryName", "autoWidth": true },
+                    { "data": "price", "autoWidth": true },
+                    { "data": "bookType", "autoWidth": true },
+                    {
+                        data: 'id',
+                        render: function (data, type, row) {
+                            var editUrl = '@Url.Action("Edit", "Book")/' + data;
+                            var detailsUrl = '@Url.Action("Details", "Book")/' + data;
+                            var deleteUrl = '@Url.Action("Delete", "Book")/' + data;
+                            return '<a href="'+ editUrl +'"class="table-action-btn btn btn-block btn-primary">' +
+                                '<i class="fas fa-edit"></i> &nbsp; Edit' +
+                                '</a>' +
+                                '<a  href="'+ detailsUrl +'"class="table-action-btn btn btn-block btn-info">' +
+                                '<i class="fas fa-info-circle"></i> &nbsp; Details' +
+                                '</a>' +
+                                
+                                '<a  href="' + deleteUrl + '"class="table-action-btn btn btn-block btn-danger">' +
+                                    ' <i class="fas fa-trash-alt"></i> &nbsp; Delete' +
+                                    '</a>';
+                                
+                        },
+                        width: "150px"
+                    }
+                ]
+            });
+        });
+
+    </script>
+}
